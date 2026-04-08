@@ -1,0 +1,117 @@
+/* DEBUG */
+
+/* div {
+  border: 1px solid rgb(33, 199, 69);
+}
+
+button {
+  border: 1px solid rgb(199, 33, 33);
+} */
+
+/* DEBUG */
+
+body {
+  margin: 0px;
+  padding: 0px;
+}
+
+#root-div {
+  display: flex;
+}
+
+#left-div {
+  background-color: rgb(56, 56, 56);
+  width: 330px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#right-div {
+  background-color: rgb(32, 32, 32);
+  flex: 1;
+  overflow-y: scroll;
+  height: 100vh;
+}
+
+.sidebar-button {
+  height: 40px;
+  background: none;
+  border: none;
+  border-radius: 10px;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-button:hover {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.sidebar-button:active {
+  background: rgba(150, 30, 30, 0.3);
+}
+
+
+
+.regular-button {
+  height: 40px;
+  background: rgb(39, 82, 20);
+  border: none;
+  border-radius: 10px;
+  padding-right: 14px;
+
+  display: flex;
+  flex-direction: row;
+  justify-content: left;
+
+  align-items: center;
+  gap: 10px;
+}
+
+.regular-button:hover {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.regular-button:active {
+  background: rgba(150, 30, 30, 0.3);
+}
+
+.button-icons {
+  width: 30px;
+  height: 30px;
+  color: white;
+}
+
+.text {
+  color: rgb(255, 255, 255);
+  font-family: "IBM"; /* ← name aus @font-face */
+  font-size: 17px;
+}
+
+@font-face {
+  font-family: "IBM";
+  src: url(./fonts/IBMPlexMono-Regular.ttf);
+}
+
+#text-box {
+  padding: 20px;
+}
+
+.input-field {
+  width: 500px;
+  height: 30px;
+  font-size: 14px;
+}
+
+#divider {
+  background-color: rgb(255, 255, 255);
+  height: 3px;
+  width: 100vh;
+}
