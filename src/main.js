@@ -7,6 +7,11 @@ const { listen } = window.__TAURI__.event;
   output.innerHTML = eventPayload.payload
 }) */
 
+
+async function init(){
+  await invoke("init");
+}
+
 async function perform_backup() {
   await invoke("perform_backup");
 }
@@ -47,11 +52,13 @@ window.addEventListener("DOMContentLoaded", () => {
     pick_fld("dst");
   });
 
+  document.querySelector("#see-folders").addEventListener("click", (e) => {
+    e.preventDefault();
+    output.innerHTML = ""
+    init();
+  });
+
+  init();
+
 
 });
-
-/* async function greet() {
-  // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-  greetMsgEl.textContent = await invoke("greet", { name: greetInputEl.value });
-}
- */

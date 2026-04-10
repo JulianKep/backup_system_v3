@@ -23,6 +23,43 @@ static one_sec: time::Duration = time::Duration::from_secs(1);
 
 use rfd::FileDialog;
 
+
+#[tauri::command]
+fn init(app: AppHandle){
+
+    let thread_fn = move || {
+
+        //get exe dir 
+        let exe_path = env::current_exe().unwrap();
+        let exe_dir = exe_path.parent().unwrap();
+
+        //get config
+        let config_path = exe_dir.join("backup.conf");
+
+        let config: String = match read_to_string(&config_path) {
+            Ok(val) => val,
+            Err(_err) => {
+                fs::write(exe_dir.join("backup.conf"), "none\nnone\n");
+
+
+                String::from("none\nnone\n")
+            }
+        };
+
+
+        let config_lines: Vec<&str> = config.lines().collect();
+
+        let sending_string = format!("Folgende Pfade sind eingestellt: <br><br> Quell-Pfad: <br>{}<br><br>Ziel-Pfad: <br>{}", config_lines[0], config_lines[1]);
+            app.emit("my_event", sending_string).unwrap();
+
+    };
+
+    spawn(thread_fn);
+
+}
+
+
+
 #[tauri::command]
 fn perform_backup(app: AppHandle){
 
@@ -36,12 +73,6 @@ fn perform_backup(app: AppHandle){
 
         //get config
         let config_path = exe_dir.join("backup.conf");
-
-
-
-        //TODO
-        /* let config: String = read_to_string(&config_path).unwrap(); */
-
 
         let config: String = match read_to_string(&config_path) {
             Ok(val) => val,
@@ -66,8 +97,7 @@ fn perform_backup(app: AppHandle){
             app_handle.emit("my_event", "kein valider Ziel-Pfad ausgewählt").unwrap();
             return
         }
-
-
+        
 
 
 
@@ -80,7 +110,7 @@ fn perform_backup(app: AppHandle){
                 let json = serde_json::to_string(&empty_Hashmap).unwrap();
                 fs::write(exe_dir.join("timestamps.json"), json);
 
-                
+
                 empty_Hashmap
             }
         };
@@ -256,6 +286,9 @@ fn pick_folders(app: AppHandle, fld: String) -> String {
 
         if fld == "src" {
             let line = format!("{}\n{}\n", selected_folder.to_str().unwrap(), y[1]);
+
+            
+
             fs::write(&config_path, line).expect("couldn't write to config file");
 
             let sending_string = format!("Quell-Ordner erfolgreich gesetzt auf: <br> <p style=\"color: green;\">{}</p>", &selected_folder.display());
@@ -264,6 +297,19 @@ fn pick_folders(app: AppHandle, fld: String) -> String {
         }
         else if fld == "dst" {
             let line = format!("{}\n{}\n", y[0], selected_folder.to_str().unwrap());
+
+            let contents = file_walk(&selected_folder.to_str().unwrap()).unwrap().0;
+
+            if !contents.is_empty() {
+
+                let sending_string = format!("<p style=\"color: red;\">Backup-Ordner muss leer sein</p>");
+                app_handle.emit("my_event", sending_string).unwrap();
+                return
+
+            }
+
+
+
             fs::write(&config_path, line).expect("couldn't write to config file");
 
             let sending_string = format!("Ziel-Ordner erfolgreich gesetzt auf: <br> <p style=\"color: green;\">{}</p>", &selected_folder.display());
@@ -278,18 +324,6 @@ fn pick_folders(app: AppHandle, fld: String) -> String {
     spawn(thread_fn);
 
     format!("success")
-}
-
-
-
-
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
-pub fn run() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![pick_folders, perform_backup])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
 }
 
 
@@ -336,4 +370,15 @@ fn file_walk(path: &str) -> Result<(Vec<PathBuf>, Vec<PathBuf>), std::io::Error>
 
     Ok((files, empty_dirs))
 
+}
+
+
+
+#[cfg_attr(mobile, tauri::mobile_entry_point)]
+pub fn run() {
+    tauri::Builder::default()
+        .plugin(tauri_plugin_opener::init())
+        .invoke_handler(tauri::generate_handler![init, pick_folders, perform_backup])
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
 }
