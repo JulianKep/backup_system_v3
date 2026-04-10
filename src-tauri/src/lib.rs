@@ -88,13 +88,13 @@ fn perform_backup(app: AppHandle){
         let config_lines: Vec<&str> = config.lines().collect();
 
 
-        if config_lines[0] == "none" {
-            app_handle.emit("my_event", "kein valider Quell-Pfad ausgewählt").unwrap();
+        if config_lines[0] == "none" || !fs::exists(PathBuf::from(config_lines[0])).unwrap(){
+            app_handle.emit("my_event", "Kein valider Quell-Pfad ausgewählt oder Pfad nicht gefunden.").unwrap();
             return
         }
 
-        if config_lines[1] == "none" {
-            app_handle.emit("my_event", "kein valider Ziel-Pfad ausgewählt").unwrap();
+        if config_lines[1] == "none" || !fs::exists(PathBuf::from(config_lines[1])).unwrap(){
+            app_handle.emit("my_event", "Kein valider Ziel-Pfad ausgewählt oder Pfad nicht gefunden.").unwrap();
             return
         }
         
@@ -194,7 +194,7 @@ fn perform_backup(app: AppHandle){
         }
 
         if !to_be_updated.is_empty(){
-            let sending_string = format!("<p style=\"color: green;\">Dateien die geupdated werden: </p>");
+            let sending_string = format!("<p style=\"color: white;\">Dateien die geupdated werden: </p>");
             app_handle.emit("my_event", sending_string).unwrap();
 
             for ele in to_be_updated {
