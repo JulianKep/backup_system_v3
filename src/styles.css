@@ -30,8 +30,12 @@ body {
 #right-div {
   background-color: rgb(32, 32, 32);
   flex: 1;
-  overflow-y: scroll;
+  overflow-y: auto;
   height: 100vh;
+}
+
+#output {
+  margin-left: 20px;
 }
 
 .sidebar-button {

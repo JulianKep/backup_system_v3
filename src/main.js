@@ -1,7 +1,6 @@
 const { invoke } = window.__TAURI__.core;
 const { listen } = window.__TAURI__.event;
 
-let output;
 
 /* listen("my_event", (eventPayload) => {
   console.log(eventPayload.payload)
@@ -17,12 +16,17 @@ async function pick_fld(fld) {
 }
 
 
+//Der Button-clik leert das output fenster, bei my_event, wird etwas in de output appended
+
 window.addEventListener("DOMContentLoaded", () => {
-  output = document.getElementById("output");
+  let output = document.getElementById("output");
+  let right_div = document.getElementById("right-div");
 
   listen("my_event", (eventPayload) => {
     console.log(eventPayload.payload);
     output.innerHTML += eventPayload.payload;
+    right_div.scrollTo(0, output.scrollHeight);
+    
   });
 
   document.querySelector("#backup-jetzt").addEventListener("click", (e) => {
