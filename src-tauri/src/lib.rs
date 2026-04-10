@@ -34,11 +34,28 @@ fn perform_backup(app: AppHandle){
         let exe_path = env::current_exe().unwrap();
         let exe_dir = exe_path.parent().unwrap();
 
-
         //get config
         let config_path = exe_dir.join("backup.conf");
-        let config: String = read_to_string(&config_path).unwrap();
+
+
+
+        //TODO
+        /* let config: String = read_to_string(&config_path).unwrap(); */
+
+
+        let config: String = match read_to_string(&config_path) {
+            Ok(val) => val,
+            Err(_err) => {
+                fs::write(exe_dir.join("backup.conf"), "none\nnone\n");
+
+
+                String::from("none\nnone\n")
+            }
+        };
+
+
         let config_lines: Vec<&str> = config.lines().collect();
+
 
         if config_lines[0] == "none" {
             app_handle.emit("my_event", "kein valider Quell-Pfad ausgewählt").unwrap();
@@ -51,19 +68,22 @@ fn perform_backup(app: AppHandle){
         }
 
 
+
+
+
         //get timestamps.json, if it doesnt exist, create an empty one
-        let timestamps_str: String = match fs::read_to_string(exe_dir.join("timestamps.json")) {
-            Ok(val) => val,
-            Err(err) => {
-                fs::File::create(exe_dir.join("timestamps.json"));
-                String::from("none")
+        let timestamps_deser: HashMap<PathBuf, u64> = match fs::read_to_string(exe_dir.join("timestamps.json")) {
+            Ok(val) => serde_json::from_str(&val).unwrap(),
+            Err(_err) => {
+                /* fs::File::create(exe_dir.join("timestamps.json")); */
+                let empty_Hashmap: HashMap<PathBuf, u64> = HashMap::new();
+                let json = serde_json::to_string(&empty_Hashmap).unwrap();
+                fs::write(exe_dir.join("timestamps.json"), json);
+
+                
+                empty_Hashmap
             }
         };
-
-
-        let timestamp_str = fs::read_to_string(exe_dir.join("timestamps.json")).unwrap();
-        let timestamps_deser = serde_json::from_str::<HashMap<PathBuf, u64>>(&timestamp_str).unwrap();
-
 
 
 
@@ -78,6 +98,9 @@ fn perform_backup(app: AppHandle){
         let obsolete_in_dst: HashSet<&PathBuf> = dst_set.difference(&src_set).collect();
         let contained_in_both: HashSet<&PathBuf> = src_set.intersection(&dst_set).collect();
 
+
+
+
         let mut to_be_updated: Vec<PathBuf> = Vec::new();
         for ele in contained_in_both {
 
@@ -90,6 +113,7 @@ fn perform_backup(app: AppHandle){
             }
 
         }
+
 
 
         if missing_in_dst.is_empty() && obsolete_in_dst.is_empty() && to_be_updated.is_empty() {
