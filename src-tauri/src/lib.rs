@@ -131,6 +131,8 @@ fn perform_backup(app: AppHandle){
 
 
 
+
+
         let mut to_be_updated: Vec<PathBuf> = Vec::new();
         for ele in contained_in_both {
 
@@ -165,10 +167,18 @@ fn perform_backup(app: AppHandle){
 
             fs::create_dir_all(in_dst.parent().unwrap()).unwrap();
 
-            fs::copy(&in_src, &in_dst).unwrap();
+            match fs::copy(&in_src, &in_dst) {
+                Ok(_val) => {
+                    let sending_string = format!("> <b style=\"color: green;\">{}</b> <br>", &in_dst.file_name().unwrap().display());
+                    app_handle.emit("my_event", sending_string).unwrap();
+                },
+                Err(_err) => {
+                    let sending_string = format!("> <b style=\"color: yellow;\">Konnte nicht kopiert werden:<br>{}</b><br>Bitte Netzwerk-/USB-Verbindung überprüfen<br>", &in_dst.file_name().unwrap().display());
+                    app_handle.emit("my_event", sending_string).unwrap();
+                }
+            }
 
-            let sending_string = format!("> <b style=\"color: green;\">{}</b> <br>", &in_dst.file_name().unwrap().display());
-            app_handle.emit("my_event", sending_string).unwrap();
+            
 
 
         }
@@ -183,12 +193,19 @@ fn perform_backup(app: AppHandle){
             for ele in obsolete_in_dst{
                 let in_dst = PathBuf::from(config_lines[1]).join(ele);
 
-                println!("{:?}", in_dst);
 
-                fs::remove_file(&in_dst).expect("couldnt delete");
+                match fs::remove_file(&in_dst){
+                    Ok(_val) => {
+                        let sending_string = format!("> <b style=\"color: red;\">{}</b> <br>", &in_dst.file_name().unwrap().display());
+                        app_handle.emit("my_event", sending_string).unwrap();
+                    },
+                    Err(_err) => {
+                        let sending_string = format!("> <b style=\"color: yellow;\">Konnte nicht entfernt werden:<br>{}</b><br>Bitte Netzwerk-/USB-Verbindung überprüfen<br>", &in_dst.file_name().unwrap().display());
+                        app_handle.emit("my_event", sending_string).unwrap();
+                    }
+                };
 
-                let sending_string = format!("> <b style=\"color: red;\">{}</b> <br>", &in_dst.file_name().unwrap().display());
-                app_handle.emit("my_event", sending_string).unwrap();
+                
             }
 
         }
@@ -203,10 +220,18 @@ fn perform_backup(app: AppHandle){
                 let dst_path = PathBuf::from(config_lines[1]).join(tmp);
 
         
-                fs::copy(&ele, dst_path);
+                match fs::copy(&ele, dst_path){
+                    Ok(_val) => {
+                        let sending_string = format!("> <b style=\"color: green;\">{}</b> <br>", &ele.file_name().unwrap().display());
+                        app_handle.emit("my_event", sending_string).unwrap();
+                    },
+                    Err(_err) => {
+                        let sending_string = format!("> <b style=\"color: yellow;\">Konnte nicht geupdated werden:<br>{}</b><br>Bitte Netzwerk-/USB-Verbindung überprüfen<br>", &ele.file_name().unwrap().display());
+                        app_handle.emit("my_event", sending_string).unwrap();
+                    }
+                };
 
-                let sending_string = format!("> <b style=\"color: green;\">{}</b> <br>", &ele.file_name().unwrap().display());
-                app_handle.emit("my_event", sending_string).unwrap();
+                
             }
 
         }

@@ -26,18 +26,26 @@ async function pick_fld(fld) {
 window.addEventListener("DOMContentLoaded", () => {
   let output = document.getElementById("output");
   let right_div = document.getElementById("right-div");
+  let spinner = document.getElementById("spinner");
 
   listen("my_event", (eventPayload) => {
     console.log(eventPayload.payload);
     output.innerHTML += eventPayload.payload;
-    right_div.scrollTo(0, output.scrollHeight);
+    output.scrollTo(0, output.scrollHeight);
+
+    if (eventPayload.payload.includes("Backup Ausgeführt</b>")) {
+      console.log("xd");
+      spinner.style.display = "none";
+    }
     
   });
 
   document.querySelector("#backup-jetzt").addEventListener("click", (e) => {
     e.preventDefault();
     output.innerHTML = ""
+    spinner.style.display = "block";
     perform_backup();
+    
   });
 
   document.querySelector("#pick-src").addEventListener("click", (e) => {
